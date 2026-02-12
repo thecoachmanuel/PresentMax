@@ -108,6 +108,7 @@ export default function SignIn() {
     setPassword("PresentMax2026!");
     
     try {
+      console.log("Attempting demo login...");
       const result = await signIn("credentials", {
         email: "demo@presentmax.com",
         password: "PresentMax2026!",
@@ -115,15 +116,22 @@ export default function SignIn() {
         callbackUrl,
       });
 
+      console.log("Demo login result:", result);
+
       if (result?.ok) {
         toast.success("Logged in as Demo User!");
+        console.log("Redirecting to:", callbackUrl);
         router.push(callbackUrl);
-        router.refresh();
+        setTimeout(() => {
+          router.refresh();
+        }, 100);
       } else {
-        toast.error("Demo login failed");
+        console.error("Demo login failed:", result?.error);
+        toast.error(`Demo login failed: ${result?.error || "Unknown error"}`);
         setIsLoading(false);
       }
     } catch (err) {
+      console.error("Demo login exception:", err);
       toast.error("An error occurred during demo login");
       setIsLoading(false);
     }

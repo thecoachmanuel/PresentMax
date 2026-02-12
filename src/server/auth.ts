@@ -45,27 +45,40 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         // --- DEMO/SEED USER BYPASS ---
         // This allows direct login with these specific credentials without Supabase
         if (email === "demo@presentmax.com" && password === "PresentMax2026!") {
-          console.log("Demo user login detected");
-          const dbUser = await db.user.upsert({
-            where: { email: "demo@presentmax.com" },
-            update: {
-              hasAccess: true, // Give demo user full access
-              role: "USER",
-            },
-            create: {
+          console.log("Demo user login attempt detected");
+          try {
+            const dbUser = await db.user.upsert({
+              where: { email: "demo@presentmax.com" },
+              update: {
+                hasAccess: true,
+                role: "USER",
+              },
+              create: {
+                email: "demo@presentmax.com",
+                name: "Demo User",
+                role: "USER",
+                hasAccess: true,
+              },
+            });
+            console.log("Demo user upsert successful:", dbUser.id);
+            return {
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.name,
+              role: dbUser.role,
+              hasAccess: dbUser.hasAccess,
+            };
+          } catch (upsertError) {
+            console.error("Demo user upsert failed:", upsertError);
+            // Even if DB upsert fails, let's try to return a temporary user to see if it works
+            return {
+              id: "demo-id",
               email: "demo@presentmax.com",
               name: "Demo User",
               role: "USER",
               hasAccess: true,
-            },
-          });
-          return {
-            id: dbUser.id,
-            email: dbUser.email,
-            name: dbUser.name,
-            role: dbUser.role,
-            hasAccess: dbUser.hasAccess,
-          };
+            };
+          }
         }
         // -----------------------------
 
