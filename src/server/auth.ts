@@ -39,8 +39,38 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+
+        // --- DEMO/SEED USER BYPASS ---
+        // This allows direct login with these specific credentials without Supabase
+        if (email === "demo@presentmax.com" && password === "PresentMax2026!") {
+          console.log("Demo user login detected");
+          const dbUser = await db.user.upsert({
+            where: { email: "demo@presentmax.com" },
+            update: {
+              hasAccess: true, // Give demo user full access
+              role: "USER",
+            },
+            create: {
+              email: "demo@presentmax.com",
+              name: "Demo User",
+              role: "USER",
+              hasAccess: true,
+            },
+          });
+          return {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.name,
+            role: dbUser.role,
+            hasAccess: dbUser.hasAccess,
+          };
+        }
+        // -----------------------------
+
         try {
-          console.log("Attempting Supabase auth for:", credentials.email);
+          console.log("Attempting Supabase auth for:", email);
           const { data, error } = await supabase.auth.signInWithPassword({
             email: credentials.email as string,
             password: credentials.password as string,

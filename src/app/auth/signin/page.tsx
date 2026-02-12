@@ -102,6 +102,33 @@ export default function SignIn() {
     }
   };
 
+  const loginAsDemo = async () => {
+    setIsLoading(true);
+    setEmail("demo@presentmax.com");
+    setPassword("PresentMax2026!");
+    
+    try {
+      const result = await signIn("credentials", {
+        email: "demo@presentmax.com",
+        password: "PresentMax2026!",
+        redirect: false,
+        callbackUrl,
+      });
+
+      if (result?.ok) {
+        toast.success("Logged in as Demo User!");
+        router.push(callbackUrl);
+        router.refresh();
+      } else {
+        toast.error("Demo login failed");
+        setIsLoading(false);
+      }
+    } catch (err) {
+      toast.error("An error occurred during demo login");
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900 px-4">
       <Card className="w-full max-w-md shadow-xl border-none">
@@ -112,6 +139,17 @@ export default function SignIn() {
           <CardDescription className="text-muted-foreground">
             Sign in to create stunning presentations in seconds
           </CardDescription>
+          <div className="mt-4">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="w-full text-xs bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+              onClick={loginAsDemo}
+              disabled={isLoading}
+            >
+              🚀 Quick Access: Login as Demo User
+            </Button>
+          </div>
           {error && (
             <div className="bg-destructive/10 border border-destructive/20 text-destructive text-xs p-3 rounded-md mt-2">
               Authentication error. Please check your credentials and try again.
