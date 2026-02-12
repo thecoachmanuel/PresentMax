@@ -117,47 +117,47 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.hasAccess = user.hasAccess;
         token.name = user.name;
-        token.email = user.email; // Ensure email is in token
+        token.email = user.email;
         token.image = user.image;
         token.picture = user.image;
-        token.location = (user as Session["user"]).location;
         token.role = user.role;
         token.isAdmin = user.role === "ADMIN";
+        // Safe access to location
+        if (user && typeof user === 'object' && 'location' in user) {
+          token.location = (user as any).location;
+        }
       }
 
       // Handle updates
       if (trigger === "update" && (session as Session)?.user) {
         try {
-          const user = await db.user.findUnique({
+          const dbUser = await db.user.findUnique({
             where: { id: token.id as string },
           });
-          if (session) {
-            token.name = (session as Session).user.name;
-            token.image = (session as Session).user.image;
-            token.picture = (session as Session).user.image;
-            token.location = (session as Session).user.location;
-            token.role = (session as Session).user.role;
-            token.isAdmin = (session as Session).user.role === "ADMIN";
+          if (dbUser) {
+            token.name = dbUser.name;
+            token.image = dbUser.image;
+            token.picture = dbUser.image;
+            token.hasAccess = dbUser.hasAccess;
+            token.role = dbUser.role;
+            token.isAdmin = dbUser.role === "ADMIN";
           }
-          if (user) {
-            token.hasAccess = user?.hasAccess ?? false;
-            token.role = user.role;
-            token.isAdmin = user.role === "ADMIN";
-          }
-        } catch (error) {
-          console.error("Database error during jwt update:", error);
+        } catch (e) {
+          console.error("JWT update error:", e);
         }
       }
 
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.user.email = token.email as string; // Ensure email is in session
-      session.user.hasAccess = token.hasAccess as boolean;
-      session.user.location = token.location as string;
-      session.user.role = token.role as string;
-      session.user.isAdmin = token.role === "ADMIN";
+      if (token && session.user) {
+        session.user.id = (token.id as string) || session.user.id;
+        session.user.email = (token.email as string) || session.user.email;
+        session.user.hasAccess = !!token.hasAccess;
+        session.user.location = token.location as string;
+        session.user.role = (token.role as string) || "USER";
+        session.user.isAdmin = token.role === "ADMIN";
+      }
       return session;
     },
     async signIn({ user, account }) {
