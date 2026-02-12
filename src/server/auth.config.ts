@@ -1,10 +1,10 @@
 import type { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "@/env";
 
 export const authConfig = {
   trustHost: true,
+  secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
   },
@@ -16,9 +16,10 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isAuthPage = nextUrl.pathname.startsWith("/auth");
       const isApiRoute = nextUrl.pathname.startsWith("/api");
+      const isPublicRoute = nextUrl.pathname === "/" || nextUrl.pathname.startsWith("/_next") || nextUrl.pathname.includes(".");
 
-      // Always allow root to redirect (handled in middleware or here)
-      if (nextUrl.pathname === "/") return true;
+      // Always allow public routes
+      if (isPublicRoute) return true;
 
       if (isAuthPage) {
         if (isLoggedIn) return Response.redirect(new URL("/presentation", nextUrl));
@@ -36,17 +37,6 @@ export const authConfig = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
-    CredentialsProvider({
-      name: "Supabase",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize() {
-        // This will be overridden in auth.ts with the actual Supabase logic
-        return null;
-      },
     }),
   ],
 } satisfies NextAuthConfig;
