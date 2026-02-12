@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "@/env";
 
 export const authConfig = {
@@ -35,6 +36,17 @@ export const authConfig = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
+    CredentialsProvider({
+      name: "Supabase",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize() {
+        // This will be overridden in auth.ts with the actual Supabase logic
+        return null;
+      },
     }),
   ],
 } satisfies NextAuthConfig;

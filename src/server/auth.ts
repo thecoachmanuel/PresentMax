@@ -4,6 +4,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession, type Session } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import { authConfig } from "./auth.config";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { supabase } from "./supabase";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -25,6 +27,50 @@ declare module "next-auth" {
 export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db) as Adapter,
+  providers: [
+    ...authConfig.providers.filter((p) => p.id !== "credentials"),
+    CredentialsProvider({
+      name: "Supabase",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: credentials.email as string,
+          password: credentials.password as string,
+        });
+
+        if (error || !data.user) return null;
+
+        // Find or create user in our DB to sync with PrismaAdapter
+        let dbUser = await db.user.findUnique({
+          where: { email: data.user.email! },
+        });
+
+        if (!dbUser) {
+          dbUser = await db.user.create({
+            data: {
+              email: data.user.email!,
+              name: data.user.user_metadata?.full_name as string | undefined,
+              role: "USER",
+              hasAccess: false,
+            },
+          });
+        }
+
+        return {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name,
+          role: dbUser.role,
+          hasAccess: dbUser.hasAccess,
+        };
+      },
+    }),
+  ],
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, trigger, session }) {
