@@ -73,7 +73,7 @@ const editorVariants = cva(
       },
       variant: {
         ghost: "",
-        allweone: "size-full pt-4 pb-72 text-base",
+        presentmax: "size-full pt-4 pb-72 text-base",
         ai: "w-full px-0 text-base md:text-sm",
         aiChat:
           "max-h-[min(70vh,320px)] w-full max-w-[700px] overflow-y-auto px-3 py-2 text-base md:text-sm",

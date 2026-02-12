@@ -1,6 +1,6 @@
-# Contributing to ALLWEONE Presentation Generator
+# Contributing to PresentMax AI Presentation Generator
 
-Thank you for your interest in contributing to the ALLWEONE Presentation Generator! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to the PresentMax AI Presentation Generator! This document provides guidelines and instructions for contributing to this project.
 
 ## Code of Conduct
 
@@ -12,14 +12,14 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 2. **Clone your fork**
 
    ```bash
-   git clone git@github.com:allweonedev/presentation-ai.git
-   cd presentation-ai
+   git clone https://github.com/thecoachmanuel/PresentMax.git
+   cd PresentMax
    ```
 
 3. **Set up the development environment**
 
    ```bash
-   pnpm install
+   npx pnpm install
    ```
 
 4. **Create a new branch** for your contribution
@@ -68,7 +68,7 @@ We follow conventional commit messages:
 
 If you find a bug or have a feature request:
 
-1. Check if it already exists in the [Issues](https://github.com/allweonedev/presentation-ai/issues)
+1. Check if it already exists in the [Issues](https://github.com/thecoachmanuel/PresentMax/issues)
 2. If not, create a new issue using the appropriate template
 3. Provide detailed steps to reproduce bugs
 4. For feature requests, explain the use case and benefits
@@ -78,10 +78,10 @@ If you find a bug or have a feature request:
 If you have questions or need help, you can:
 
 - Open a discussion on GitHub
-- Reach out via the project's communication channels ([Discord](https://discord.gg/fsMHMhAHRV) / [Issues](https://github.com/allweonedev/presentation-ai/issues))
+- Reach out via the project's communication channels ([GitHub Issues](https://github.com/thecoachmanuel/PresentMax/issues))
 
 ## License
 
 By contributing to this project, you agree that your contributions will be licensed under the project's [MIT License](LICENSE).
 
-Thank you for contributing to make ALLWEONE Presentation Generator better for everyone!
+Thank you for contributing to make PresentMax AI Presentation Generator better for everyone!

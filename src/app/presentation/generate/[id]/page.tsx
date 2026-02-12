@@ -69,7 +69,7 @@ export default function PresentationGenerateWithIdPage() {
     if (typeof document === "undefined") return;
 
     const domain =
-      window.location.hostname === "localhost" ? "localhost" : ".allweone.com";
+      window.location.hostname === "localhost" ? "localhost" : window.location.hostname;
 
     document.cookie = `${PRESENTATION_GENERATION_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; ${domain !== "localhost" ? `domain=${domain}; ` : ""}`;
   };

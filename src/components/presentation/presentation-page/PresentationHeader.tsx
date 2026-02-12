@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // Import our new components
-import AllweoneText from "@/components/globals/allweone-logo";
+import PresentMaxLogo from "@/components/globals/present-max-logo";
 import { Button } from "@/components/ui/button";
 import * as motion from "framer-motion/client";
 import { ExportButton } from "./buttons/ExportButton";
@@ -62,7 +62,7 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
             transition={{ duration: 1 }}
           >
             <Link href="/" className="h-max">
-              <AllweoneText className="h-10 w-[7.5rem] cursor-pointer transition-transform duration-100 active:scale-95"></AllweoneText>
+              <PresentMaxLogo className="h-10 w-[7.5rem] cursor-pointer transition-transform duration-100 active:scale-95"></PresentMaxLogo>
             </Link>
           </motion.div>
         </div>
