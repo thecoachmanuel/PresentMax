@@ -3,7 +3,8 @@ import { db } from "@/server/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession, type Session } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import GoogleProvider from "next-auth/providers/google";
+import { authConfig } from "./auth.config";
+
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
@@ -22,11 +23,10 @@ declare module "next-auth" {
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  trustHost: true,
-  session: {
-    strategy: "jwt",
-  },
+  ...authConfig,
+  adapter: PrismaAdapter(db) as Adapter,
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
@@ -44,7 +44,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const user = await db.user.findUnique({
           where: { id: token.id as string },
         });
-        console.log("Session", session, user);
         if (session) {
           token.name = (session as Session).user.name;
           token.image = (session as Session).user.image;
@@ -89,12 +88,4 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return true;
     },
   },
-
-  adapter: PrismaAdapter(db) as Adapter,
-  providers: [
-    GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
 });
