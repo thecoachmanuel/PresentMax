@@ -84,7 +84,9 @@ export function ModelPicker({
 
   // Get current model value
   const getCurrentModelValue = () => {
-    if (modelProvider === "ollama") {
+    if (modelProvider === "openrouter") {
+      return "openrouter-deepseek";
+    } else if (modelProvider === "ollama") {
       return `ollama-${modelId}`;
     } else if (modelProvider === "lmstudio") {
       return `lmstudio-${modelId}`;
@@ -99,6 +101,13 @@ export function ModelPicker({
     if (currentValue === "openai") {
       return {
         label: "GPT-4o-mini",
+        icon: Bot,
+      };
+    }
+
+    if (currentValue === "openrouter-deepseek") {
+      return {
+        label: "DeepSeek R1 (Free)",
         icon: Bot,
       };
     }
@@ -137,6 +146,11 @@ export function ModelPicker({
       setModelId("");
       setSelectedModel("openai", "");
       console.log("Saved to localStorage: openai, ''");
+    } else if (value === "openrouter-deepseek") {
+      setModelProvider("openrouter");
+      setModelId("deepseek/deepseek-r1:free");
+      setSelectedModel("openrouter", "deepseek/deepseek-r1:free");
+      console.log("Saved to localStorage: openrouter, deepseek/deepseek-r1:free");
     } else if (value.startsWith("ollama-")) {
       const model = value.replace("ollama-", "");
       setModelProvider("ollama");
@@ -196,6 +210,17 @@ export function ModelPicker({
           {/* OpenAI Group */}
           <SelectGroup>
             <SelectLabel>Cloud Models</SelectLabel>
+            <SelectItem value="openrouter-deepseek">
+              <div className="flex items-center gap-3">
+                <Bot className="h-4 w-4 flex-shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate text-sm">DeepSeek R1 (Free)</span>
+                  <span className="text-xs text-muted-foreground truncate">
+                    Free AI via OpenRouter
+                  </span>
+                </div>
+              </div>
+            </SelectItem>
             <SelectItem value="openai">
               <div className="flex items-center gap-3">
                 <Bot className="h-4 w-4 flex-shrink-0" />

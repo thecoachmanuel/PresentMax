@@ -21,7 +21,7 @@ interface PresentationState {
   imageSource: "ai" | "stock";
   stockImageProvider: "unsplash";
   presentationStyle: string;
-  modelProvider: "openai" | "ollama" | "lmstudio";
+  modelProvider: "openai" | "ollama" | "lmstudio" | "openrouter";
   modelId: string;
   savingStatus: "idle" | "saving" | "saved";
   isPresenting: boolean;
@@ -91,7 +91,7 @@ interface PresentationState {
   setImageSource: (source: "ai" | "stock") => void;
   setStockImageProvider: (provider: "unsplash") => void;
   setPresentationStyle: (style: string) => void;
-  setModelProvider: (provider: "openai" | "ollama" | "lmstudio") => void;
+  setModelProvider: (provider: "openai" | "ollama" | "lmstudio" | "openrouter") => void;
   setModelId: (id: string) => void;
   setSavingStatus: (status: "idle" | "saving" | "saved") => void;
   setIsPresenting: (isPresenting: boolean) => void;
@@ -146,8 +146,8 @@ export const usePresentationState = create<PresentationState>((set) => ({
   imageSource: "stock",
   stockImageProvider: "unsplash",
   presentationStyle: "professional",
-  modelProvider: "openai",
-  modelId: "llama3.1:8b",
+  modelProvider: "openrouter",
+  modelId: "deepseek/deepseek-r1:free",
   slides: [], // Now holds the new slide object structure
   outlineThinking: "",
   presentationThinking: "",
