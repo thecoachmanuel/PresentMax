@@ -51,8 +51,15 @@ export default function SignIn() {
         callbackUrl,
       });
 
+      console.log("NextAuth signIn result:", result);
+
       if (result?.error) {
-        toast.error("Invalid email or password");
+        console.error("NextAuth signIn error:", result.error);
+        if (result.error === "CredentialsSignin") {
+          toast.error("Invalid email or password. If you just signed up, please verify your email first.");
+        } else {
+          toast.error(result.error || "Invalid email or password");
+        }
         setIsLoading(false);
         return;
       }

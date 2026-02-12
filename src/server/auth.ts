@@ -39,37 +39,55 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: credentials.email as string,
-          password: credentials.password as string,
-        });
+        try {
+          console.log("Attempting Supabase auth for:", credentials.email);
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: credentials.email as string,
+            password: credentials.password as string,
+          });
 
-        if (error || !data.user) return null;
+          if (error) {
+            console.error("Supabase auth error:", error.message);
+            return null;
+          }
 
-        // Sync with our DB
-        const dbUser = await db.user.upsert({
-          where: { email: data.user.email },
-          update: {
-            image: data.user.user_metadata.avatar_url,
-            name: data.user.user_metadata.full_name,
-          },
-          create: {
-            email: data.user.email,
-            image: data.user.user_metadata.avatar_url,
-            name: data.user.user_metadata.full_name,
-            role: "USER",
-            hasAccess: false,
-          },
-        });
+          if (!data.user || !data.user.email) {
+            console.error("No user or email returned from Supabase");
+            return null;
+          }
 
-        return {
-          id: dbUser.id,
-          email: dbUser.email,
-          name: dbUser.name,
-          image: dbUser.image,
-          role: dbUser.role,
-          hasAccess: dbUser.hasAccess,
-        };
+          console.log("Supabase auth successful for:", data.user.email);
+
+          // Sync with our DB
+          const dbUser = await db.user.upsert({
+            where: { email: data.user.email },
+            update: {
+              image: data.user.user_metadata?.avatar_url || null,
+              name: data.user.user_metadata?.full_name || data.user.email.split('@')[0],
+            },
+            create: {
+              email: data.user.email,
+              image: data.user.user_metadata?.avatar_url || null,
+              name: data.user.user_metadata?.full_name || data.user.email.split('@')[0],
+              role: "USER",
+              hasAccess: false,
+            },
+          });
+
+          console.log("DB sync successful for:", dbUser.email);
+
+          return {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.name,
+            image: dbUser.image,
+            role: dbUser.role,
+            hasAccess: dbUser.hasAccess,
+          };
+        } catch (err) {
+          console.error("Authorize error:", err);
+          return null;
+        }
       },
     }),
   ],
