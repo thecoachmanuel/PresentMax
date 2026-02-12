@@ -11,6 +11,7 @@ export const env = createEnv({
       .default("development"),
 
     OPENAI_API_KEY: z.string(),
+    OPENROUTER_API_KEY: z.string(),
     TOGETHER_AI_API_KEY: z.string(),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -39,6 +40,7 @@ export const env = createEnv({
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
     TOGETHER_AI_API_KEY: process.env.TOGETHER_AI_API_KEY,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,

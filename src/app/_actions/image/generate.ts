@@ -4,21 +4,22 @@ import { utapi } from "@/app/api/uploadthing/core";
 import { env } from "@/env";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import Together from "together-ai";
 import { UTFile } from "uploadthing/server";
 
-const together = new Together({ apiKey: env.TOGETHER_AI_API_KEY });
+// Using OpenRouter for image generation via OpenAI compatible API
+const openrouterImageUrl = "https://openrouter.ai/api/v1";
+const openrouterApiKey = env.OPENROUTER_API_KEY;
 
 export type ImageModelList =
   | "black-forest-labs/FLUX1.1-pro"
   | "black-forest-labs/FLUX.1-schnell"
   | "black-forest-labs/FLUX.1-schnell-Free"
-  | "black-forest-labs/FLUX.1-pro"
-  | "black-forest-labs/FLUX.1-dev";
+  | "google/imagen-3-fast" // OpenRouter free image models
+  | "black-forest-labs/flux-schnell-free";
 
 export async function generateImageAction(
   prompt: string,
-  model: ImageModelList = "black-forest-labs/FLUX.1-schnell-Free",
+  model: ImageModelList = "google/imagen-3-fast",
 ) {
   // Get the current session
   const session = await auth();
@@ -29,37 +30,47 @@ export async function generateImageAction(
   }
 
   try {
-    console.log(`Generating image with model: ${model}`);
+    console.log(`Generating image with OpenRouter model: ${model}`);
 
-    // Generate the image using Together AI
-    const response = (await together.images.create({
-      model: model,
-      prompt: prompt,
-      width: 1024,
-      height: 768,
-      steps: model.includes("schnell") ? 4 : 28, // Fewer steps for schnell models
-      n: 1,
-    })) as unknown as {
-      id: string;
-      model: string;
-      object: string;
-      data: {
-        url: string;
-      }[];
+    // Generate the image using OpenRouter (OpenAI compatible API)
+    const response = await fetch(`${openrouterImageUrl}/images/generations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${openrouterApiKey}`,
+        "HTTP-Referer": "https://github.com/thecoachmanuel/PresentMax",
+        "X-Title": "PresentMax",
+      },
+      body: JSON.stringify({
+        model: model,
+        prompt: prompt,
+        size: "1024x768",
+        n: 1,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenRouter image generation error:", errorText);
+      throw new Error(`OpenRouter image generation failed: ${response.statusText}`);
+    }
+
+    const result = (await response.json()) as {
+      data: { url: string }[];
     };
 
-    const imageUrl = response.data[0]?.url;
+    const imageUrl = result.data[0]?.url;
 
     if (!imageUrl) {
-      throw new Error("Failed to generate image");
+      throw new Error("No image URL returned from OpenRouter");
     }
 
     console.log(`Generated image URL: ${imageUrl}`);
 
-    // Download the image from Together AI URL
+    // Download the image from OpenRouter URL
     const imageResponse = await fetch(imageUrl);
     if (!imageResponse.ok) {
-      throw new Error("Failed to download image from Together AI");
+      throw new Error("Failed to download image from OpenRouter");
     }
 
     const imageBlob = await imageResponse.blob();
