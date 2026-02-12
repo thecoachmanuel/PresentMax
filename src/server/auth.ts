@@ -27,6 +27,9 @@ declare module "next-auth" {
 export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db) as Adapter,
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     ...authConfig.providers.filter((p) => p.id !== "credentials"),
     CredentialsProvider({
@@ -115,10 +118,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       session.user.isAdmin = token.role === "ADMIN";
       return session;
     },
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
+        const email = user.email || profile?.email;
+        if (!email) return false;
+
         const dbUser = await db.user.findUnique({
-          where: { email: user.email! },
+          where: { email },
           select: { id: true, hasAccess: true, role: true },
         });
 
