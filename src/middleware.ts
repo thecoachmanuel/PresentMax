@@ -6,26 +6,29 @@ const { auth } = NextAuth(authConfig);
 
 export async function middleware(request: NextRequest) {
   const session = await auth();
-  const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
+  const { pathname } = request.nextUrl;
+  const isAuthPage = pathname.startsWith("/auth");
+  const isApiRoute = pathname.startsWith("/api");
+  const isPublicFile = pathname.includes(".") || pathname.startsWith("/_next");
+
+  console.log(`Middleware: ${pathname} [isLoggedIn: ${!!session}]`);
 
   // Always redirect from root to /presentation
-  if (request.nextUrl.pathname === "/") {
+  if (pathname === "/") {
     return NextResponse.redirect(new URL("/presentation", request.url));
   }
 
-  // If user is on auth page but already signed in, redirect to home page
+  // If user is on auth page but already signed in, redirect to dashboard
   if (isAuthPage && session) {
     return NextResponse.redirect(new URL("/presentation", request.url));
   }
 
-  // If user is not authenticated and trying to access a protected route, redirect to sign-in
-  if (!session && !isAuthPage && !request.nextUrl.pathname.startsWith("/api")) {
-    return NextResponse.redirect(
-      new URL(
-        `/auth/signin?callbackUrl=${encodeURIComponent(request.url)}`,
-        request.url,
-      ),
-    );
+  // Protected routes: everything except auth, api, and public files
+  if (!session && !isAuthPage && !isApiRoute && !isPublicFile) {
+    const searchParams = new URLSearchParams({
+      callbackUrl: request.url,
+    });
+    return NextResponse.redirect(new URL(`/auth/signin?${searchParams}`, request.url));
   }
 
   return NextResponse.next();

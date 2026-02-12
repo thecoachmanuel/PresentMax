@@ -12,26 +12,7 @@ export const authConfig = {
     signIn: "/auth/signin",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isAuthPage = nextUrl.pathname.startsWith("/auth");
-      const isApiRoute = nextUrl.pathname.startsWith("/api");
-      const isPublicRoute = nextUrl.pathname === "/" || nextUrl.pathname.startsWith("/_next") || nextUrl.pathname.includes(".");
-
-      // Always allow public routes
-      if (isPublicRoute) return true;
-
-      if (isAuthPage) {
-        if (isLoggedIn) return Response.redirect(new URL("/presentation", nextUrl));
-        return true;
-      }
-
-      if (!isLoggedIn && !isApiRoute) {
-        return false; // Redirect to login
-      }
-
-      return true;
-    },
+    // We will handle authorization in the middleware file directly for more control
   },
   providers: [
     GoogleProvider({
