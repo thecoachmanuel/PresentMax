@@ -4,6 +4,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession, type Session } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import { authConfig } from "./auth.config";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { supabase } from "./supabase";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -26,6 +28,51 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db) as Adapter,
   secret: env.NEXTAUTH_SECRET,
+  providers: [
+    ...authConfig.providers,
+    CredentialsProvider({
+      name: "Supabase",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: credentials.email as string,
+          password: credentials.password as string,
+        });
+
+        if (error || !data.user) return null;
+
+        // Sync with our DB
+        const dbUser = await db.user.upsert({
+          where: { email: data.user.email },
+          update: {
+            image: data.user.user_metadata.avatar_url,
+            name: data.user.user_metadata.full_name,
+          },
+          create: {
+            email: data.user.email,
+            image: data.user.user_metadata.avatar_url,
+            name: data.user.user_metadata.full_name,
+            role: "USER",
+            hasAccess: false,
+          },
+        });
+
+        return {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name,
+          image: dbUser.image,
+          role: dbUser.role,
+          hasAccess: dbUser.hasAccess,
+        };
+      },
+    }),
+  ],
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, trigger, session }) {
