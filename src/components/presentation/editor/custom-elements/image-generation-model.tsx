@@ -32,8 +32,8 @@ const MODEL_OPTIONS = [
     value: "black-forest-labs/FLUX.1-schnell-Free",
   },
   {
-    label: "FLUX Developer",
-    value: "black-forest-labs/FLUX.1-dev",
+    label: "Imagen Fast",
+    value: "google/imagen-3-fast",
   },
   {
     label: "FLUX Premium",

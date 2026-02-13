@@ -15,7 +15,7 @@ import { Image, Wand2 } from "lucide-react";
 
 export const IMAGE_MODELS: { value: ImageModelList; label: string }[] = [
   { value: "black-forest-labs/FLUX.1-schnell-Free", label: "FLUX Fast" },
-  { value: "black-forest-labs/FLUX.1-dev", label: "FLUX Developer" },
+  { value: "google/imagen-3-fast", label: "Imagen Fast" },
   { value: "black-forest-labs/FLUX1.1-pro", label: "FLUX Premium" },
 ];
 
